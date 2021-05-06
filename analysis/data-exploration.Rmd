@@ -2,7 +2,7 @@
 title: "Comparing reported COVID-19 cases with forecasts"
 author: "Joe Palmer"
 date: "06/05/2021"
-output: rmarkdown::github_document
+output: github_document
 always_allow_html: true
 ---
 
