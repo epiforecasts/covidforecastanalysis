@@ -94,7 +94,11 @@ plot_grid(
 of cases produced 1, 7 and 14 days prior to the given date. **B**. Mean
 Absolute Distance, Mean Absolute Percentage Error, Mean Squared Error
 and Root Mean Squared Error by the number of days before target
-date.](data-exploration_files/figure-gfm/unnamed-chunk-3-1.png)
+date.](data-exploration_files/figure-gfm/unnamed-chunk-3-1.png) Figure
+1. **A**. Confirmed COVID-19 cases with median forecasted numer of cases
+produced 1, 7 and 14 days prior to the given date. **B**. Mean Absolute
+Distance, Mean Absolute Percentage Error, Mean Squared Error and Root
+Mean Squared Error by the number of days before target date.
 
 ``` r
 joined %>%
@@ -108,3 +112,4 @@ joined %>%
 
 ![Figure 2. Reported COVID-19 cases with forecast
 estimates](data-exploration_files/figure-gfm/unnamed-chunk-4-1.png)
+Figure 2. Reported COVID-19 cases with forecast estimates
