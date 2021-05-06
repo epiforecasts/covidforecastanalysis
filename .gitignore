@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+data/united-kingom-forecast-data/
+azcopy_linux_amd64_10.10.0/
