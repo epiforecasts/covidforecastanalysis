@@ -36,7 +36,8 @@ example <- full %>%
 
   )
 
-rmarkdown::paged_table(example)
+# rmarkdown::paged_table(example)
+head(example)
 ```
 
 With this data we can explore the forecastes compare to the actual case numbers for a given region.
