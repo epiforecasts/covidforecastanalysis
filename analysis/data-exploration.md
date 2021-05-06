@@ -6,7 +6,7 @@ Joe Palmer
 Every day the Epiforecasts team produces estimates of COVID-19 cases for
 the next 14 days. Snapshots of these forecasts, along with other data,
 are stored daily in date marked directories. The objective of this
-document is to show a comparison between the forcasted cases and what
+document is to show a comparison between the forecasted cases and what
 the actual case numbers ended up as.
 
 Two data files were used to perform this analysis. 1)
@@ -32,86 +32,105 @@ a different forecast date spanning the previous 14 days.
     ## 5 2021-03-15    2021-03-05      70 reported_cases  <NA> forecast    115 158.60075 281.91285    54.00       83      101      131      166   351.05 Derbyshire
     ## 6 2021-03-15    2021-03-06      70 reported_cases  <NA> forecast    104 120.64275  73.78495    51.00       78       93      116      142   239.00 Derbyshire
 
-With this data we can explore the forecastes compare to the actual case
+With this data we can explore the forecasts compare to the actual case
 numbers for a given region.
 
-## forcastes vs actuals for Derbyshire
+## forecasts vs actuals for Derbyshire
 
 ``` r
 joined <- full %>%
   filter(region == "Derbyshire") %>%
-  mutate(d2d = date - forecast_date) %>%
-  group_by(d2d) %>%
-  mutate(
-      MSE = sum((confirm-median)^2) / length(confirm),
-      RMSE = sqrt(MSE),
-      MAD = sum(abs(confirm-median)) / length(confirm),
-      MAPE = sum((abs(confirm-median)/confirm)*100) / length(confirm)
-  )
+  mutate(d2d = date - forecast_date) # %>%
+# group_by(d2d) %>%
+# mutate(
+#     MSE = sum((confirm-median)^2) / length(confirm),
+#     RMSE = sqrt(MSE),
+#     MAD = sum(abs(confirm-median)) / length(confirm),
+#     MAPE = sum((abs(confirm-median)/confirm)*100) / length(confirm)
+# )
 ```
 
 ``` r
-forcases_vs_confirmed <- joined %>%
-    filter(d2d %in% c(1, 7, 14)) %>%
-    ggplot(aes(x=forecast_date)) +
-    geom_line(aes(y=confirm, color = "confirmed")) +
-    geom_line(aes(y=median, color = "median forecast")) +
-    scale_color_manual(values = c(
-      'confirmed' = 'black',
-      'median forecast' = 'red')
-    ) +
-    labs(
-      x = "forecast date",
-      y = "cases",
-      color = 'Type'
-    ) +
-    theme(legend.position="top") +
-    facet_grid(rows=vars(d2d))
+forecast_vs_confirmed <- joined %>%
+  filter(
+    d2d %in% c(1, 7, 14),
+    date >= "2021-03-01" & date <= "2021-04-01"
+  ) %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = confirm, color = "confirmed")) +
+  geom_line(aes(y = median, color = "median forecast")) +
+  scale_color_manual(values = c(
+    "confirmed" = "black",
+    "median forecast" = "red"
+  )) +
+  labs(
+    x = "forecast date",
+    y = "cases",
+    color = "Type"
+  ) +
+  theme(legend.position = "top") +
+  facet_grid(rows = vars(d2d))
 
 mean_foracst_confirmed_diff <- joined %>%
-    gather(key = "statistic", value = "value", MSE:MAPE) %>%
-    group_by(d2d, statistic) %>%
-    summarise_at(vars(value), mean) %>%
-    ggplot(aes(x=d2d, y=value)) +
-    geom_bar(stat="identity", fill = "grey", width = 0.8) +
-    labs(
-      x = "Days between forecast and actual cases reported",
-      y = "value"
-    ) +
-    facet_grid(rows = vars(statistic), scales="free_y")
+  filter(
+    date >= "2021-03-01" & date <= "2021-04-01"
+  ) %>%
+  group_by(d2d) %>%
+  mutate(
+    MSE = sum((confirm - median)^2) / length(confirm),
+    RMSE = sqrt(MSE),
+    MAD = sum(abs(confirm - median)) / length(confirm),
+    MAPE = sum((abs(confirm - median) / confirm) * 100) / length(confirm)
+  ) %>%
+  ungroup() %>%
+  gather(key = "statistic", value = "value", MSE:MAPE) %>%
+  group_by(d2d, statistic) %>%
+  summarise_at(vars(value), mean) %>%
+  ggplot(aes(x = d2d, y = value)) +
+  geom_bar(stat = "identity", fill = "grey", width = 0.8) +
+  labs(
+    x = "Days between forecast and actual cases reported",
+    y = "value"
+  ) +
+  scale_x_continuous(
+    breaks = c(1:14),
+    labels = c(1:14)
+  ) +
+  facet_grid(rows = vars(statistic), scales = "free_y")
 
 plot_grid(
-  forcases_vs_confirmed,
+  forecast_vs_confirmed,
   mean_foracst_confirmed_diff,
   labels = "AUTO",
   ncol = 1
 )
 ```
 
-    ## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
+![Figure 1. **A**. Confirmed COVID-19 cases with median forecasted
+number of cases produced 1, 7 and 14 days prior to the given date.
+**B**. Mean Absolute Distance, Mean Absolute Percentage Error, Mean
+Squared Error and Root Mean Squared Error by the number of days before
+target date.](data-exploration_files/figure-gfm/unnamed-chunk-3-1.png)
 
-![Figure 1. **A**. Confirmed COVID-19 cases with median forecasted numer
-of cases produced 1, 7 and 14 days prior to the given date. **B**. Mean
-Absolute Distance, Mean Absolute Percentage Error, Mean Squared Error
-and Root Mean Squared Error by the number of days before target
-date.](data-exploration_files/figure-gfm/unnamed-chunk-3-1.png)
-
-Figure 1. **A**. Confirmed COVID-19 cases with median forecasted numer
-of cases produced 1, 7 and 14 days prior to the given date. **B**. Mean
-Absolute Distance, Mean Absolute Percentage Error, Mean Squared Error
-and Root Mean Squared Error by the number of days before target date.
+Figure 1. COVID-19 cases for Derbyshire between March and April 2021.
+**A**. Confirmed COVID-19 cases with median forecasted number of cases
+produced 1, 7 and 14 days prior to the given date. **B**. Mean Absolute
+Distance, Mean Absolute Percentage Error, Mean Squared Error and Root
+Mean Squared Error by the number of days before target date.
 
 ``` r
 joined %>%
   filter(d2d == 5) %>%
-  ggplot(aes(x=date)) +
-  geom_bar(aes(y=confirm), stat="identity", fill = "grey", width = 0.8) +
-  geom_line(aes(y=median), colour = "red", alpha = 0.6) +
+  ggplot(aes(x = date)) +
+  geom_bar(aes(y = confirm), stat = "identity", fill = "grey", width = 0.8) +
+  geom_line(aes(y = median), colour = "red", alpha = 0.6) +
   labs(x = "Date", y = "Cases") +
-  geom_ribbon(aes(ymin=lower_50, ymax=upper_50), fill = "red", alpha = 0.2)
+  geom_ribbon(aes(ymin = lower_50, ymax = upper_50), fill = "red", alpha = 0.2)
 ```
 
 ![Figure 2. Reported COVID-19 cases with forecast
 estimates](data-exploration_files/figure-gfm/unnamed-chunk-4-1.png)
 
-Figure 2. Reported COVID-19 cases with forecast estimates
+Figure 2. Reported COVID-19 cases with 5 day forecast estimates. Line
+indicates estimated cases, shading gives upper and lower 50th
+percentile.
