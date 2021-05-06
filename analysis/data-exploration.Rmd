@@ -97,6 +97,7 @@ plot_grid(
   ncol = 1
 )
 ```
+
 Figure 1. **A**. Confirmed COVID-19 cases with median forecasted numer of cases produced 1, 7 and 14 days prior to the given date. **B**. Mean Absolute Distance, Mean Absolute Percentage Error, Mean Squared Error and Root Mean Squared Error by the number of days before target date.
 
 ```{r, fig.cap = "Figure 2. Reported COVID-19 cases with forecast estimates"}
@@ -108,4 +109,5 @@ joined %>%
   labs(x = "Date", y = "Cases") +
   geom_ribbon(aes(ymin=lower_50, ymax=upper_50), fill = "red", alpha = 0.2)
 ```
+
 Figure 2. Reported COVID-19 cases with forecast estimates
