@@ -75,7 +75,7 @@ forecast_vs_confirmed <- joined %>%
     "median forecast" = "red"
   )) +
   labs(
-    x = "forecast date",
+    x = "Date",
     y = "cases",
     color = "Type"
   ) +

@@ -1,0 +1,102 @@
+---
+title: "Comparing forecasted COVID-19 RT with estimates"
+author: "Joe Palmer"
+date: "06/05/2021"
+output: github_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(cowplot)
+theme_set(
+  theme_classic() + theme(text = element_text(family = "URWHelvetica", size = 12))
+)
+```
+
+
+Every day the Epiforecasts team produces estimates of COVID-19 cases for the next 14 days. Snapshots of these forecasts, along with other data, are stored daily in date marked directories. The objective of this document is to show a comparison between the forecasted Rt and what the retrospective estimated ended up as.
+
+`summarised_estimates.rds`, was used as this file shows estimates, estimates based on partial data and forecasts. To prepare the data I filtered the summarised estimates for forecasts and estimates for Rt. This gives 14 forecasts for each date. The estimates are also done on a rolling basis, with older estimates ommited from newer datasets. To get around this for the first date we have I grab all the previous estimates up to that date and on the other dates I grab just the latest estimated date (1 per dataset). The estimates and forcastes are joind together giving 15 rows for each date. The first it the retrospective estimate and the other 14 are forecasts from the previous 14 days.
+
+An issue I ran into here is that as you move through the date files previous rows listed as estimates often change. It is unclear what one to use, but I wen't with the estimate at that time.
+
+### Example data
+
+```{r, echo=FALSE}
+# load uk data
+uk_rds_path <- "../data/processed_data/"
+full <- readRDS(paste0(uk_rds_path, "uk_combined_rt_forecast.rds"))
+example <- full %>%
+  filter(region == "Derbyshire", date == as.Date("2021-03-15")) %>%
+  select(
+    date,
+    forecast_date,
+    everything()
+  )
+
+# rmarkdown::paged_table(example)
+head(example, 15)
+```
+
+
+The following plot is the forecastes made 1, 2, ..., 14 days before the target date. All the lines overlap, so an estimate 1 and 14 days away are almost identical and have very little variation. This is weird..
+
+```{r}
+
+plt1 <- full %>%
+  mutate(
+    forecast_date = as.Date(forecast_date),
+    d2d = as.factor(date - forecast_date)
+  ) %>%
+  filter(
+    region == "Derbyshire",
+    forecast_date >= as.Date("2021-03-02") & forecast_date <= as.Date("2021-03-04")
+  ) %>%
+  ggplot(aes(x = forecast_date, y = median)) +
+  geom_line(aes(colour = d2d))
+
+show(plt1)
+```
+
+This being the case we can pick any to look at.
+
+```{r}
+
+full %>%
+  mutate(
+    forecast_date = as.Date(forecast_date),
+    d2d = date - forecast_date
+  ) %>%
+  filter(
+    region == "Derbyshire",
+    #   date >= "2021-03-01" & date <= "2021-04-01",
+    d2d %in% c(1, NA)
+  ) %>%
+  ggplot(aes(x = date, y = median, colour = type)) +
+  geom_line()
+
+
+full %>%
+  filter(region == "Manchester", type == "estimate", date > as.Date("2021-03-01"))
+```
+
+```{r}
+
+tst <- full %>%
+  mutate(
+    forecast_date = as.Date(forecast_date),
+    d2d = as.factor(date - forecast_date)
+  ) %>%
+  filter(
+    region == "Derbyshire",
+    date >= "2021-03-01" & date <= "2021-04-01",
+    d2d %in% c(1, 2, 3, 4, 5)
+  )
+
+tst
+```
